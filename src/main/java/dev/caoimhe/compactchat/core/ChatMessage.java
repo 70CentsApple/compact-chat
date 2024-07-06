@@ -17,7 +17,8 @@ public class ChatMessage {
      * A regex pattern to match " (X+)", X being any number, and '+' being optional.
      * It also ensures that the closing parentheses is the end of the string.
      */
-    private static final Pattern OCCURRENCES_TEXT_PATTERN = Pattern.compile("\\([0-9]+[+]?\\)$");
+    private static final String OCCURRENCES_TEXT_PATTERN_STRING = "\\([0-9]+[+]?\\)$";
+    private static final Pattern OCCURRENCES_TEXT_PATTERN = Pattern.compile(OCCURRENCES_TEXT_PATTERN_STRING);
 
     /**
      * The styling for the occurrences text
@@ -33,7 +34,7 @@ public class ChatMessage {
      * Increments the occurrences counter.
      */
     public void addOccurrence() {
-        // To prevent lag occurring after spamming messages, let's stop modifying it after 100 occurrences.
+        // To prevent lag occurring after spamming messages, let's stop modifying it after maximum occurrences.
         occurrences = Math.min(occurrences + 1, Configuration.getInstance().maximumOccurrences);
     }
 
@@ -63,19 +64,9 @@ public class ChatMessage {
     }
 
     /**
-     * Returns an unmodified version of a modified text (one that has occurrences appended).
+     * Returns the text with occurrences stripped.
      */
     private Text removeOccurencesText(Text modifiedText) {
-        return TextUtil.removeSiblings(modifiedText, this::hasOccurrencesAppended);
-    }
-
-    /**
-     * If a text is modified with occurences or not
-     */
-    private boolean hasOccurrencesAppended(Text text) {
-        var hasOccurrencesAtTheEnd = OCCURRENCES_TEXT_PATTERN.matcher(text.getString()).find();
-        var hasOccurrencesStyle = text.getStyle() == OCCURENCES_TEXT_STYLE;
-
-        return hasOccurrencesAtTheEnd && hasOccurrencesStyle;
+        return Text.literal(modifiedText.getString().replaceAll(OCCURRENCES_TEXT_PATTERN_STRING, ""));
     }
 }

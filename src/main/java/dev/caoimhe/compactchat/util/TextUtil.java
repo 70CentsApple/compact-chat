@@ -9,15 +9,9 @@ public class TextUtil {
     /**
      * A regex pattern to match a timestamp of HH:mm(:ss?).
      * It can be surrounded by any character.
+     * Also washes the color codes (if there is) for once
      */
-    private static final String TIMESTAMP_PATTERN = ".?\\d{1,2}:\\d{2}(:\\d{2})*.?";
-
-    public static Text removeSiblings(Text parent, Predicate<Text> predicate) {
-        var copy = parent.copy();
-        copy.getSiblings().removeIf(predicate);
-
-        return copy;
-    }
+    private static final String TIMESTAMP_PATTERN = "(§.)*.?\\d{1,2}:\\d{2}(:\\d{2})*.?\\s*(§.)*";
 
     /**
      * Most mods add create a new text literal and append the original text to it.
@@ -29,15 +23,14 @@ public class TextUtil {
             return text;
         }
 
-        var string = textContent.string();
-        var withoutTimestamps = string.replaceAll(TIMESTAMP_PATTERN, "");
+        var string = text.getString().trim();
+        var withoutTimestamps = string.replaceAll(TIMESTAMP_PATTERN, "").trim();
         if (withoutTimestamps.equals(string)) {
             return text;
         }
 
         var newText = Text.literal(withoutTimestamps.trim());
         newText.setStyle(newText.getStyle());
-        newText.getSiblings().addAll(text.getSiblings());
 
         return newText;
     }
